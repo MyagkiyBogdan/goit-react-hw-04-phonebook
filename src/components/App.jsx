@@ -35,8 +35,10 @@ export function App() {
       }, []);
 
       if (allContacts.includes(name.toLocaleLowerCase())) {
-        return alert(`${name} already in contacts.`);
+        alert(`${name} already in contacts.`);
+        return contacts;
       }
+
       const newContact = { id: nanoid(), name, number };
       return [...prevState, newContact];
     });
