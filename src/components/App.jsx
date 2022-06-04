@@ -1,47 +1,35 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import ContactForm from './ContactForm';
 import ContactList from './ContactList';
 import EmptyMessage from './EmptyMessage';
 import Filter from './Filter';
-export class App extends Component {
-  INITIAL_STATE = [
-    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  ];
 
-  state = {
-    contacts: [...this.INITIAL_STATE],
-    filter: '',
-  };
+const INITIAL_STATE = [
+  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+  { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+  { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+];
 
-  componentDidMount() {
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
-    // if (parsedContacts !== null) if localStorage empty
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
+export function App() {
+  const [contacts, setContacts] = useState(
+    JSON.parse(localStorage.getItem('contacts')) ?? [...INITIAL_STATE]
+  );
+  const [filter, setFilter] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  deleteContact = contactId => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
-  };
+  // Первый рендер: поставить пустой массив зависимостей []
+  // Каждый рендер: если не указать массив зависимостей
+  // Каждый рендер при изменении пропса или стейта (+ первый рендер): указываем в массив зависимостей нужные пропы или стейт.
+  // Последний рендер: для этого из useEffect нужно вернуть функцию отчистки (с пустым массивом зависимостей)
 
-  addContact = ({ name, number }) => {
-    this.setState(prevState => {
-      const { contacts } = this.state;
-      const allContacts = contacts.reduce((acc, contact) => {
+  const addContact = ({ name, number }) => {
+    setContacts(prevState => {
+      const allContacts = prevState.reduce((acc, contact) => {
         acc.push(contact.name.toLocaleLowerCase());
         return acc;
       }, []);
@@ -50,53 +38,53 @@ export class App extends Component {
         return alert(`${name} already in contacts.`);
       }
       const newContact = { id: nanoid(), name, number };
-      return {
-        contacts: [...prevState.contacts, newContact],
-      };
+      return [...prevState, newContact];
     });
   };
 
-  changeFilter = event => {
-    this.setState({
-      filter: event.target.value,
-    });
+  const deleteContact = contactId => {
+    setContacts(prevState =>
+      prevState.filter(contact => contact.id !== contactId)
+    );
   };
 
-  makeFilteredMarkup = () => {
-    const lowerCaseFilter = this.state.filter.toLocaleLowerCase();
-    const filteredArray = [...this.state.contacts].filter(contact =>
+  const changeFilter = event => {
+    setFilter(event.target.value);
+  };
+
+  const makeFilteredMarkup = () => {
+    const lowerCaseFilter = filter.toLocaleLowerCase();
+    const filteredArray = [...contacts].filter(contact =>
       contact.name.toLocaleLowerCase().includes(lowerCaseFilter)
     );
     return filteredArray;
   };
 
-  render() {
-    const { filter, contacts } = this.state;
-    const filteredArray = this.makeFilteredMarkup();
-    return (
-      <div className="wrapper">
-        <div className="header-section">
-          <h1>Phonebook</h1>
-        </div>
-        <div className="main-section">
-          <ContactForm onSubmit={this.addContact} />
-          <div className="contacts-secton">
-            <h2 className="page-title">Your contacts</h2>
-            {contacts.length > 0 ? (
-              <>
-                <Filter value={filter} onChange={this.changeFilter} />
+  const filteredArray = makeFilteredMarkup();
 
-                <ContactList
-                  contacts={filteredArray}
-                  onDelClick={this.deleteContact}
-                />
-              </>
-            ) : (
-              <EmptyMessage />
-            )}
-          </div>
+  return (
+    <div className="wrapper">
+      <div className="header-section">
+        <h1>Phonebook</h1>
+      </div>
+      <div className="main-section">
+        <ContactForm onSubmit={addContact} />
+        <div className="contacts-secton">
+          <h2 className="page-title">Your contacts</h2>
+          {contacts.length > 0 ? (
+            <>
+              <Filter value={filter} onChange={changeFilter} />
+
+              <ContactList
+                contacts={filteredArray}
+                onDelClick={deleteContact}
+              />
+            </>
+          ) : (
+            <EmptyMessage />
+          )}
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
