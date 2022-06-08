@@ -1,5 +1,5 @@
 import styles from './ContactListItem.module.css';
-import { ReactComponent as DelBtn } from '../../icons/del.svg';
+import { ReactComponent as DelBtn } from '../../../icons/del.svg';
 import PropTypes from 'prop-types';
 const ContactListItem = ({ id, name, number, onClick }) => {
   return (
@@ -20,10 +20,10 @@ const ContactListItem = ({ id, name, number, onClick }) => {
 };
 
 ContactListItem.propTypes = {
-  id: PropTypes.string,
-  name: PropTypes.string,
-  number: PropTypes.string,
-  onClick: PropTypes.func,
+  id: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  number: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default ContactListItem;
