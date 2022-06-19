@@ -7,8 +7,6 @@ function ContactForm({ onSubmit }) {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
-  const contactData = { name: name, number: number };
-
   const handleChange = event => {
     switch (event.currentTarget.name) {
       case 'name':
@@ -24,8 +22,8 @@ function ContactForm({ onSubmit }) {
 
   const handleSubmit = e => {
     e.preventDefault();
-
-    // приходит из пропсов формы из компонента App - по факту мы вызываем функцию addContact(куда передаем state формы)
+    const contactData = { name: name, number: number };
+    // приходит из пропсов формы из компонента App - по факту мы вызываем функцию addContact(куда передаем данные state формы)
 
     onSubmit(contactData);
     setName('');
